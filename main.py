@@ -3,11 +3,9 @@ from dotenv import load_dotenv
 import discord
 from discord.ext import commands
 import random
-import requests
 import pandas as pd
-from io import StringIO
-import pytz
 import re
+from keep_alive import keep_alive
 
 load_dotenv()
 TOKEN = os.getenv('TOKEN')
@@ -16,7 +14,7 @@ CHANNEL = os.getenv('CHANNEL')
 # Intentsの設定
 intents = discord.Intents.all()
 intents.messages = True  # メッセージイベントに反応させる
-bot = discord.Bot(intents=intents)
+bot = commands.Bot(command_prefix='!', intents=intents)
 
 
 # ボットが準備完了したときに実行されるイベント
@@ -87,7 +85,7 @@ def get_quote(quotes_df, line=None):
   return quote, info, line
 
 # ランダムな名言とその行番号をEmbedで送信するコマンド
-@bot.slash_command(name="名言", description="数字入れると指定できるよ")
+@bot.tree.command(name="名言", description="数字入れると指定できるよ")
 async def send_quote(interaction: discord.Interaction, line: int = None):
     await interaction.response.defer()
     quotes_df = await load_quotes()
@@ -130,7 +128,7 @@ LIST3 = load_list_from_file("nokunokutaString/list3.txt")
 LIST4 = load_list_from_file("nokunokutaString/list4.txt")
 
 
-@bot.slash_command(name="のくのくた語", description="ランダムなのくのくた語を生成")
+@bot.tree.command(name="のくのくた語", description="ランダムなのくのくた語を生成")
 async def nokunokuta(interaction: discord.Interaction):
   await interaction.response.defer()
   random_words = random.choice(LIST1) + random.choice(LIST2) + random.choice(
@@ -138,34 +136,11 @@ async def nokunokuta(interaction: discord.Interaction):
   embed = discord.Embed(title="のくのくた語",
                         description=random_words,
                         color=0x2f4f4f)
-  await interaction.respond(embed=embed)
-
-##########################################
-# イベント転記
-##########################################
-async def send_event_embed(event, color, content):
-  print(event)
-  jst = pytz.timezone('Asia/Tokyo')
-  start_time = event.start_time.astimezone(jst).strftime("%Y-%m-%d %H:%M")
-  channel = bot.get_channel(CHANNEL)
-  embed = discord.Embed(title=event.name,
-                        description=event.description,
-                        color=color)
-  embed.add_field(name="開始日時", value=start_time)
-  embed.add_field(name="開催場所", value=event.location)
-  embed.set_author(name=event.creator.global_name,
-                   icon_url=event.creator.avatar)
-  await channel.send(content=content, embed=embed)
-
-@bot.event
-async def on_scheduled_event_create(event):
-  await send_event_embed(event, 0x2196F3, "以下のイベントが作成されました🏁")
+  await interaction.followup.send(embed=embed)
 
 
-@bot.event
-async def on_scheduled_event_update(before, after):
-  await send_event_embed(after, 0x4CAF50, "以下のイベントが更新されました🔄")
-
+# 常時稼働
+keep_alive()
 
 # トークンを使ってボットを実行
 try:
