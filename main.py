@@ -5,7 +5,7 @@ from discord.ext import commands
 import random
 import pandas as pd
 import re
-from keep_alive import keep_alive
+# from keep_alive import keep_alive
 
 load_dotenv()
 TOKEN = os.getenv('TOKEN')
@@ -14,7 +14,7 @@ CHANNEL = os.getenv('CHANNEL')
 # Intentsの設定
 intents = discord.Intents.all()
 intents.messages = True  # メッセージイベントに反応させる
-bot = commands.Bot(command_prefix='!', intents=intents)
+bot = commands.Bot(command_prefix='!', intents=intents, activity=discord.Game("名言"))
 
 
 # ボットが準備完了したときに実行されるイベント
