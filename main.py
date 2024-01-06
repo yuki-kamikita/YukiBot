@@ -140,7 +140,7 @@ async def nokunokuta(interaction: discord.Interaction):
 
 
 # 常時稼働
-keep_alive()
+# keep_alive()
 
 # トークンを使ってボットを実行
 try:
