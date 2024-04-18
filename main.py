@@ -25,14 +25,33 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
-  # ボット自身のメッセージは無視する
-  if message.author == bot.user:
-    return
+    # ボット自身のメッセージは無視する
+    if message.author == bot.user:
+        return
 
-  print(f"メッセージ受信: {message.content}")
+    # 返信メッセージの配列
+    replies = [
+        "🤖",
+        "🧚",
+        "・ワ・｛うえてしぬのだ",
+        "すみません、よくわかりません",
+        "人間は愚か",
+    ]
 
-  # コマンドを処理するために必要
-  # await bot.process_commands(message)
+    # メッセージがボットのメンションを含むか確認
+    if bot.user.mentioned_in(message) and not message.mention_everyone:
+        if "ドミニオン" in message.content:
+            # 特定のキーワードが含まれている場合の返信
+            await message.channel.send("やりません")
+        else:
+            # 配列からランダムな返信を選ぶ
+            response = random.choice(replies)
+            await message.channel.send(response)
+
+    print(f"メッセージ受信: {message.content}")
+
+    # コマンドを処理するために必要
+    await bot.process_commands(message)
 
 
 ##########################################
